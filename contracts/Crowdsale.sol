@@ -41,19 +41,6 @@ contract Crowdsale {
 
   function () public payable {revert();}
 
-  function joinQueue() public {
-    queue.enqueue(msg.sender);
-  }
-
-  function checkQueue() public {
-    queue.checkTime();
-  }
-
-  function getFirst() public constant returns (address) {
-    return queue.getFirst();
-  }
-
-
   function buy() public payable windowOpen() {
     require(queue.getFirst() == msg.sender);
     require(queue.qsize() > 1);

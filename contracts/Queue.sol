@@ -50,6 +50,7 @@ contract Queue {
 
 	/* Returns the address of the person in the front of the queue */
 	function getFirst() public constant returns(address) {
+		require(currentSize > 0);
 		return items[modShift].user;
 	}
 
@@ -65,7 +66,7 @@ contract Queue {
 	 * limit is up
 	 */
 	function checkTime() public {
-		if (items[modShift].timeout < now) dequeue();
+		if (items[modShift].timeout > now) dequeue();
 	}
 
 	/* Removes the first person in line; either when their time is up or when
@@ -86,8 +87,11 @@ contract Queue {
 	/* Places `addr` in the first empty position in the queue */
 	function enqueue(address addr) public {
 		require(currentSize < size);
-		if (currentSize == 0) items[(modShift+currentSize)%size] = QueueItem(addr, now + timelimit);
-		else items[(modShift+currentSize)%size] = QueueItem(addr, 0);
+		items[(modShift+currentSize)%size] = QueueItem(addr, 0);
 		currentSize += 1;
+	}
+
+	function getMaxSize() public returns(uint8) {
+		return size;
 	}
 }
