@@ -13,12 +13,12 @@ import './utils/SafeMath.sol';
 contract Crowdsale {
   Token public token;
   Queue public queue;
-  uint tokensPerWei;
-  uint tokenSaleCap;
-  uint numSold;
-  address owner;
-  uint startTime;
-  uint endTime;
+  uint public tokensPerWei;
+  uint public tokenSaleCap;
+  uint public numSold;
+  address public owner;
+  uint public startTime;
+  uint public endTime;
 
   mapping (address => uint) deposits;
 
@@ -53,11 +53,15 @@ contract Crowdsale {
   }
 
   function refund(uint amount) public windowOpen() {
+    token.refund(msg.sender, amount);
     uint eth = SafeMath.div(amount, tokensPerWei);
     deposits[msg.sender] = SafeMath.add(deposits[msg.sender], eth);
-    //FIXME move tokens from msg.sender to contract address
     numSold = SafeMath.sub(numSold, amount);
     TokensRefunded(msg.sender, amount);
+  }
+
+  function depositOf(address user) public returns (uint) {
+    return deposits[user];
   }
 
   function withdraw(uint amount) public {
@@ -66,8 +70,15 @@ contract Crowdsale {
     msg.sender.transfer(amount);
   }
 
-  function ownerWithdraw() public onlyOwner() windowClosed() {
+  function ownerWithdraw() public
+  onlyOwner()
+  windowClosed()
+  {
     owner.transfer(SafeMath.div(numSold, tokensPerWei));
+  }
+
+  function ownerMint(address receiver, uint amount) public onlyOwner() {
+    token.mint(receiver, amount);
   }
 
   function ownerBurn(uint amount) public onlyOwner() windowClosed() {
