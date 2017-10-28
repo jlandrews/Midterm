@@ -50,6 +50,7 @@ contract Queue {
 
 	/* Returns the address of the person in the front of the queue */
 	function getFirst() public constant returns(address) {
+		require(currentSize > 0);
 		return items[modShift].user;
 	}
 
@@ -88,5 +89,9 @@ contract Queue {
 		require(currentSize < size);
 		items[(modShift+currentSize)%size] = QueueItem(addr, 0);
 		currentSize += 1;
+	}
+
+	function getMaxSize() public returns(uint8) {
+		return size;
 	}
 }
