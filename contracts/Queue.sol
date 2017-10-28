@@ -27,6 +27,8 @@ contract Queue {
 	QueueItem[5] items;
 	address saleContract;
 
+	event DEBUG(uint a, uint b);
+
 
 	/* Add events */
 	// YOUR CODE HERE
@@ -66,7 +68,8 @@ contract Queue {
 	 * limit is up
 	 */
 	function checkTime() public {
-		if (items[modShift].timeout > now) dequeue();
+		DEBUG(items[modShift].timeout, now);
+		if (items[modShift].timeout < now) dequeue();
 	}
 
 	/* Removes the first person in line; either when their time is up or when
@@ -87,7 +90,10 @@ contract Queue {
 	/* Places `addr` in the first empty position in the queue */
 	function enqueue(address addr) public {
 		require(currentSize < size);
-		items[(modShift+currentSize)%size] = QueueItem(addr, 0);
+		if (currentSize == 0)
+			items[(modShift+currentSize)%size] = QueueItem(addr, now+timelimit);
+		else
+			items[(modShift+currentSize)%size] = QueueItem(addr, 0);
 		currentSize += 1;
 	}
 

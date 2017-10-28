@@ -67,10 +67,13 @@ contract('QueueTest', function(accounts) {
 
   describe('CheckTime Test', function() {
     it("Should kick out first person in queue if his/her time is up", async function() {
-      await q.enqueue(0);
-      await (new Promise(resolve => setTimeout(resolve, 3000)));
+      await q.enqueue(accounts[1]);
+      await (new Promise(resolve => setTimeout(resolve, 5000)));
+      await q.checkTime();
       let size = await q.qsize.call()
+      let empty = await q.empty.call();
       assert.equal(size, 0, "time is up");
+      assert.equal(empty, true, "should be empty");
     })
   });
 
@@ -159,22 +162,4 @@ contract('QueueTest', function(accounts) {
       assert.equal(beg, 7, "first buyer in the queue should be address 7");
 		})
 	});
-
-  // describe('CheckTime Test', function() {
-  //   it("Should kick out first person in queue if his/her time is up", async function() {
-  //     await q.enqueue(0);
-  //     setTimeout(function(){
-  //       return q.qsize.call()
-  //       .then(function () {
-  //         assert.equal(size, 0, "time is up");
-  //       });
-  //     }, 3000);
-  //   })
-  // });
-
-  // function hi() {
-  //   let size = await q.qsize.call();
-  //   assertEquals(size, 0, "time is up");
-  //   console.log("hello");
-  // }
 });
