@@ -18,6 +18,19 @@ contract('QueueTest', function(accounts) {
     q = qInstance;
 	});
 
+  function promiseToThrow(p,msg) {
+    return p.then(_ => false).catch(_ => true).then(res =>
+      assert(res, msg));
+   }
+   /*
+   promiseToThrow example:
+   it("should not allow funds to be sent directly to the contract", () => {
+    return promiseToThrow(
+      betcon.send(10), "transaction should throw exception"
+    );
+    });
+   */
+
 	/* Group test cases together
 	 * Make sure to provide descriptive strings for method arguements and
 	 * assert statements
