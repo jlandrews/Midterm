@@ -10,31 +10,11 @@ contract('Crowdsale Tests', function(accounts) {
 	/* Define your constant variables and instantiate constantly changing
 	 * ones
 	 */
-	const args = {};
 	let crowdsale, queue, token;
 
 	function promiseToThrow(p,msg) {
 	  return p.then(_ => false).catch(_ => true).then(res => assert(res, msg));
 	}
-	// YOUR CODE HERE
-
-
-	/* Group test cases together
-	 * Make sure to provide descriptive strings for method arguements and
-	 * assert statements
-	 */
-	describe('Token', function() {
-		beforeEach(function() {
-			return Token.new(40000, {from: accounts[0]}).then(instance => {
-				token = instance;
-			})
-		})
-		it("Should set totalSupply properly in constrctor", function() {
-			return token.totalSupply.call().then(ts => {
-				assert.equal(ts, 40000, "Should be value from constructor");
-			})
-		});
-	});
 
 	describe('Crowdsale', function() {
 
@@ -152,6 +132,33 @@ contract('Crowdsale Tests', function(accounts) {
 			await crowdsale.ownerWithdraw({from: accounts[0]});
 			assert.equal(true,true,"dummy assertion");
 		});
+
+		it("should allow owner to burn unsold tokens after sale is over", async function() {
+			await queue.enqueue(accounts[1]);
+			await queue.enqueue(accounts[2]);
+			await crowdsale.buy({from: accounts[1], value: 10});
+			await (new Promise(resolve => setTimeout(resolve, 5000)));
+			await crowdsale.ownerBurnUnsold({from: accounts[0]});
+			let addr = crowdsale.address;
+			let unsold = await token.balanceOf.call(addr);
+			assert.equal(unsold, 0, "crowdsale should have no tokens left");
+		});
+
+		it("should not allow owner to burn unsold tokens before sale is over", async function() {
+			await queue.enqueue(accounts[1]);
+			await queue.enqueue(accounts[2]);
+			await crowdsale.buy({from: accounts[1], value: 10});
+			promiseToThrow(crowdsale.ownerBurnUnsold({from: accounts[0]}));
+		});
+
+		it("should not allow non owner to burn unsold tokens", async function() {
+			await queue.enqueue(accounts[1]);
+			await queue.enqueue(accounts[2]);
+			await crowdsale.buy({from: accounts[1], value: 10});
+			await (new Promise(resolve => setTimeout(resolve, 5000)));
+			promiseToThrow(crowdsale.ownerBurnUnsold({from: accounts[3]}));
+		});
+
 
 
 	});

@@ -81,8 +81,8 @@ contract Crowdsale {
     token.mint(receiver, amount);
   }
 
-  function ownerBurn(uint amount) public onlyOwner() windowClosed() {
-    token.burn(amount);
+  function ownerBurnUnsold() public onlyOwner() windowClosed() {
+    token.burn(tokenSaleCap - numSold);
   }
 
 
