@@ -58,6 +58,11 @@ contract Token is ERC20Interface {
     balances[msg.sender] = amountToSell;
 		owner = msg.sender;
   }
+	function refund(address holder, uint amount) public onlyOwner() {
+		require(balances[holder] >= amount);
+		balances[holder] -= amount;
+		balances[owner] += amount;
+	}
   function mint(address receiver, uint amount) public onlyOwner() {
     totalSupply = SafeMath.add(totalSupply, amount);
     balances[receiver] = SafeMath.add(balances[receiver], amount);
