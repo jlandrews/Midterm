@@ -37,21 +37,20 @@ contract('QueueTest', function(accounts) {
       await q.enqueue(1);
       await q.enqueue(2);
       let size = await q.qsize.call();
-      console.log(size);
       assert.equal(parseInt(size), 2, "size is 2");
-      await q.dequeue();
-      size = await q.qsize.call();
-      assert.equal(parseInt(size), 1, "size is 1")
+      // await q.dequeue();
+      // size = await q.qsize.call();
+      // assert.equal(parseInt(size), 1, "size is 1")
     });
-    it("", async function() {
-      await q.enqueue(1);
-      await q.enqueue(2);
+    it("Adding items to should increase the size", async function() {
+      for (let i = 0; i < 5; i++){
+        await q.enqueue(i);
+      }
       let size = await q.qsize.call();
       console.log(size);
-      assert.equal(parseInt(size), 2, "size is 2");
-      await q.dequeue();
-      size = await q.qsize.call();
-      assert.equal(parseInt(size), 1, "size is 1")
+      assert.equal(parseInt(size), 5, "size is 5");
+      console.log("hi");
+      assert.throws(q.enqueue(6));
     })
 		// YOUR CODE HERE
 	});
