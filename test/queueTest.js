@@ -65,11 +65,20 @@ contract('QueueTest', function(accounts) {
 
 	});
 
+  describe('CheckTime Test', function() {
+    it("Should kick out first person in queue if his/her time is up", async function() {
+      await q.enqueue(0);
+      await (new Promise(resolve => setTimeout(resolve, 3000)));
+      let size = await q.qsize.call()
+      assert.equal(size, 0, "time is up");
+    })
+  });
+
 	describe('Enqueue and Dequeue Tests', function() {
     it("The beginning of the queue is the item we added", async function() {
       await q.enqueue(accounts[0]);
-      // let beg = await q.getFirst.call();
-      // assert.equal(parseInt(beg), accounts, "first user is 99")
+      let beg = await q.getFirst.call();
+      assert.equal(parseInt(beg), accounts[0], "first user is 99")
       let pos = await q.checkPlace.call({from: accounts[0]});
       assert.equal(pos, 0, "position 0");
 		}),
@@ -91,6 +100,18 @@ contract('QueueTest', function(accounts) {
       assert.equal(parseInt(size), maxSize, "size is max size");
       promiseToThrow(q.enqueue(q.size+1), "enqueueing when queue is full should throw an error")
     }),
+    it("Check Place throws error if the address isn't in queue", async function() {
+      await q.enqueue(accounts[1]);
+      promiseToThrow(q.checkPlace.call({from: accounts[0]}));
+    }),
+    it("Checking the position of a buyer after enqueuing and dequeuing", async function() {
+      await q.enqueue(accounts[0]);
+      await q.enqueue(accounts[1]);
+      await q.enqueue(accounts[2]);
+      await q.externDequeue();
+      let pos = await q.checkPlace.call({from: accounts[2]});
+      assert.equal(pos, 1, "position 1");
+		}),
     it("Removing items should decrease the size, and removing when queue is empty should throw error", async function() {
       for (let i = 0; i < maxSize; i++){
         await q.enqueue(i);
