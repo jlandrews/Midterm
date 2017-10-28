@@ -11,8 +11,8 @@ import './utils/SafeMath.sol';
  */
 
 contract Crowdsale {
-  Token token;
-  Queue queue;
+  Token public token;
+  Queue public queue;
   uint tokensPerWei;
   uint tokenSaleCap;
   uint numSold;
@@ -41,6 +41,19 @@ contract Crowdsale {
 
   function () public payable {revert();}
 
+  function joinQueue() public {
+    queue.enqueue(msg.sender);
+  }
+
+  function checkQueue() public {
+    queue.checkTime();
+  }
+
+  function getFirst() public constant returns (address) {
+    return queue.getFirst();
+  }
+
+
   function buy() public payable windowOpen() {
     require(queue.getFirst() == msg.sender);
     require(queue.qsize() > 1);
@@ -55,6 +68,7 @@ contract Crowdsale {
   function refund(uint amount) public windowOpen() {
     uint eth = SafeMath.div(amount, tokensPerWei);
     deposits[msg.sender] = SafeMath.add(deposits[msg.sender], eth);
+    //FIXME move tokens from msg.sender to contract address
     numSold = SafeMath.sub(numSold, amount);
     TokensRefunded(msg.sender, amount);
   }
